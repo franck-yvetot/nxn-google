@@ -1,0 +1,23 @@
+{
+  "name": "@nxn/google",
+  "version": "1.0.0",
+  "description": "google APIs wrapped in services that can be configured from a json object (such as managed by @nxn/boot)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/franck-yvetot/nxn-google.git"
+  },
+  "keywords": [
+    "google",
+    "nxn"
+  ],
+  "author": "Franck Yvetot",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/franck-yvetot/nxn-google/issues"
+  },
+  "homepage": "https://github.com/franck-yvetot/nxn-google#readme"
+}
