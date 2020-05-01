@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/franck-yvetot/nxn-google/issues"
   },
-  "homepage": "https://github.com/franck-yvetot/nxn-google#readme"
+  "homepage": "https://github.com/franck-yvetot/nxn-google#readme",
+  "dependencies": {
+    "googleapis": "^49.0.0"
+  }
 }
