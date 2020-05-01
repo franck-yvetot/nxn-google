@@ -1,6 +1,6 @@
 /* Service for Google Buckets */ 
 const axios = require("axios");
-const {configSce} = require("nxn-boot");
+const {configSce} = require("@nxn/boot");
 
 const {Storage} = require('@google-cloud/storage');
 
@@ -8,9 +8,9 @@ const {Storage} = require('@google-cloud/storage');
 // const pathConfig = __dirname+"/../client_data/";
 // const pathBuckets = pathConfig+"/buckets";
 
-const fs = require('nxn/file.service');
+const fs = require('@nxn/files/file.service');
 
-const debug=require("nxn-boot/debug.service")("GBUCKET");
+const debug=require("@nxn/debug")("GBUCKET");
 
 class GoogleBucketsInstance
 {

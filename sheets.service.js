@@ -1,4 +1,4 @@
-const debug = require("nxn-boot/debug.service")('Sheets');
+const debug = require("@nxn/debug")('Sheets');
 const {google} = require('googleapis');
 const gauth = require("./googleauth.service");
 

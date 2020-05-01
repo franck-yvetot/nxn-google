@@ -1,4 +1,4 @@
-const debug = require("nxn-boot/debug.service")('FIRESTORE');
+const debug = require("@nxn/debug")('FIRESTORE');
 const admin = require('firebase-admin');
 
 class FireStoreInstance

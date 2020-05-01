@@ -1,7 +1,7 @@
 var googleReqSce = require("./googlerequest.service");
 
-const debug = require("nxn-boot/debug.service")('GCS');
-const arraySce=require("nxn-boot/array.service");
+const debug = require("@nxn/debug")('GCS');
+const arraySce=require("@nxn/ext/array.service");
 
 var scopes = [
     "https://www.googleapis.com/auth/cloud_search"

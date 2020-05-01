@@ -1,4 +1,4 @@
-const debug = require("nxn-boot/debug.service")('googlerequest');
+const debug = require("@nxn/debug")('googlerequest');
 var RequestP = require("request-promise-native");
 var gauth = require("./googleauth2");
 
