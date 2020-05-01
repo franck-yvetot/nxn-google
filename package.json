@@ -21,6 +21,16 @@
   },
   "homepage": "https://github.com/franck-yvetot/nxn-google#readme",
   "dependencies": {
-    "googleapis": "^49.0.0"
+    "@google-cloud/bigquery": "^4.7.0",
+    "@google-cloud/storage": "^4.7.0",
+    "@nxn/config": "^1.0.0",
+    "@nxn/debug": "^1.0.1",
+    "@nxn/ext": "^1.0.1",
+    "@nxn/files": "^1.0.3",
+    "axios": "^0.19.2",
+    "firebase-admin": "^8.11.0",
+    "google-auth-library": "^6.0.0",
+    "googleapis": "^49.0.0",
+    "request-promise-native": "^1.0.8"
   }
 }

@@ -1,6 +1,6 @@
 /* Service for Google Buckets */ 
 const axios = require("axios");
-const {configSce} = require("@nxn/boot");
+const configSce = require("@nxn/config");
 
 const {Storage} = require('@google-cloud/storage');
 
