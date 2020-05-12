@@ -71,7 +71,7 @@ class GCS_ItemsSceInstance
         })
         .catch((err)=>
         {
-          debug.error(`GCS INDEX ERROR on /datasources/${dsId}/items/${itemId} : `+err.error.message);
+          debug.error(`GCS INDEX ERROR on /datasources/${dsId}/items/${itemId} : `+err.message);
           reject(err);
         });
     });

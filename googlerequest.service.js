@@ -6,7 +6,7 @@ class GoogleRequestInstance
 {
     constructor(keypath,scopes,config) {
         this.config = config || {};
-        this.keypath = keypath || this.config.keypath;
+        this.keypath = keypath || this.config.keypath || null;
         this.scopes = scopes;
         this.jwt = null;
     }
@@ -36,7 +36,7 @@ class GoogleRequestInstance
                 jwt = await self.getJwt();            
             } catch (error) {
 
-                debug.error("Error : cant get jwt on scope "+this.scopes+" and keypath = "+this.keypath+" "+error.message+error.stack);
+                debug.error("Error : cant get jwt on scope "+self.scopes+" and keypath = "+self.keypath+" "+error.message+error.stack);
                 reject(error);         
                 return;   
             }

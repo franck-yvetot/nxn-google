@@ -40,10 +40,12 @@ class GoogleBucketsInstance
             this.useLastIfFails = this.config.get_last_if_fails || false;
             this.uploadFile = this.config.upload_file || true;
             
+            const keypath = this.config.keypath || 'keyfile.json';
+
             // create storage client
             this.storage = new Storage({
                 projectId: this.config.cloud_project_id,
-                keyFilename: this.configDir+'keyfile.json',
+                keyFilename: this.configDir+keypath,
             });
 
             if(this.storage)
@@ -74,6 +76,9 @@ class GoogleBucketsInstance
         try {
             await this.connect();
 
+            // make sur tmp dir is created
+            const tmpDir = await fs.createParentDirAsync(tmp);
+
             const {bucket,file} = this.getBucketFile(bucketName,fileName);
             await file.download({
                 destination: tmp,
@@ -85,9 +90,11 @@ class GoogleBucketsInstance
         }
         catch(err) {
             try {
-                await fs.unlinkFileAsync(path);                
+                debug.error(err.message);
+                await fs.unlinkFileAsync(tmp);                
             } 
             catch (error) {
+                debug.error(error.message);
             }
 
             return Promise.reject(err);
@@ -211,9 +218,10 @@ class GoogleBucketsInstance
     }
 
     async uploadFileToBucket(localPath,bucketName,fileName) {
-        const {bucket,file} = this.getBucketFile(bucketName,fileName);
 
         await this.connect();
+
+        const {bucket,file} = this.getBucketFile(bucketName,fileName);
 
         await bucket.upload(localPath, {
             // The path to which the file should be uploaded
