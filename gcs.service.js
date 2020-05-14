@@ -2,6 +2,9 @@ var googleReqSce = require("./googlerequest.service");
 
 const debug = require("@nxn/debug")('GCS');
 const arraySce=require("@nxn/ext/array.service");
+const stringSce=require("@nxn/ext/string.service");
+
+const crypto = require('crypto')   
 
 var scopes = [
     "https://www.googleapis.com/auth/cloud_search"
@@ -34,14 +37,57 @@ class GCS_ItemsSceInstance
       this.dsId = dsId;
       this.keypath = keypath;
       this.config = config;
+      this.connectorName = config.connectorName || "default";
       this.googleReq = googleReqSce.getInstance(keypath,scopes);
   }
 
   createDocument(itemId, type, titre, url, lang,config) {
+    config = config || this.config;
     return  GCSDocument.build(this.dsId, itemId, type, titre, url, lang,config);
   }
   createDocumentFromData(data,config) {
+    config = config || this.config;
     return GCSDocument.buildFromData(this.dsId, data, config);
+  }
+
+  formatId(itemId) {
+    return formatItemId(itemId);
+  }
+
+  getDoc(itemId,asDoc=true) {
+    let self = this;
+
+    const dsId = this.dsId;
+    const payload = '';
+
+    const fields = ""
+    var url = `https://cloudsearch.googleapis.com/v1/indexing/datasources/${dsId}/items/${itemId}?&key=`;
+  
+    return new Promise(function(resolve, reject) 
+    {
+        self.googleReq.get(url)
+        .then((result) => 
+        {
+          if(result.error)
+            reject(result);
+          else
+          {
+            let res2;
+            
+            if(asDoc)
+              res2 = self.createDocumentFromData(result,self.config);
+            else
+              res2 = result;
+
+            resolve(res2);
+          }
+        })
+        .catch((err)=>
+        {
+          debug.error(`GCS GET ERROR on /datasources/${dsId}/items/${itemId} : `+err.message);
+          reject(err);
+        });
+    });    
   }
 
   indexDoc(doc) {
@@ -71,7 +117,8 @@ class GCS_ItemsSceInstance
         })
         .catch((err)=>
         {
-          debug.error(`GCS INDEX ERROR on /datasources/${dsId}/items/${itemId} : `+err.message);
+          const message = err.message || (err.error && err.error.message) || '';
+          debug.error(`GCS INDEX ERROR on /datasources/${dsId}/items/${itemId} : `+message);
           reject(err);
         });
     });
@@ -117,6 +164,7 @@ class GCS_ItemsSceInstance
       if(res && res.docs.length)
       {
         if(cb)
+          // call cb for each page
           await cb(res.docs)
         else
           docs = docs.concat(res.docs);
@@ -133,6 +181,7 @@ class GCS_ItemsSceInstance
 
     } while(!finished)
 
+    // no cb => returns all docs in one big array (not recommanded)
     if(cb)
       return len;
     else
@@ -190,11 +239,12 @@ class GCSDocument
   constructor(config) 
   {
     this.config = config||{};
+    this.connectorName = config.connectorName || "default";
   }
 
   init(dsId, itemId, type, title, url, lang) {
 
-    this.itemId = itemId;
+    this.itemId = formatItemId(itemId);
     this.dsId = dsId;
     this.type = type;
     this.title = title;
@@ -251,6 +301,7 @@ class GCSDocument
       this.config.checkData = true;
 
       this.version = data.version;
+      this.versionDecode = this.getVersion(false);
   }
 
   static build(dsId, itemId, type, title, url, lang,config) {
@@ -283,6 +334,9 @@ class GCSDocument
   setVersion(version) {
     if(!version)
     {
+      if(this.config.version=="timestamp")
+        version = timestamp(null);
+      else
       version = dateString(null);
     }
 
@@ -291,10 +345,10 @@ class GCSDocument
     return this;
   }
 
-  getVersion(is64=true) {
+  getVersion(as64=true) {
     let v = this.item.version;
 
-    if(!is64)
+    if(!as64)
       v = decodeB64(v);
 
     return v;
@@ -413,13 +467,38 @@ module.exports = new GCSearchSce();
 
 
 // private functions
+function formatItemId(itemId,asMD5=false) {
+  if(itemId.length > 1500)
+    return formatItemId(itemId,true);
+
+  if(asMD5)
+    itemId = md5(itemId);
+  else
+  {
+    itemId.replace(/[_\-.]/g,"-");
+    itemId = stringSce.removeAccents(itemId);
+  }
+
+  return itemId;
+}
+
+function md5(s)
+{
+  return crypto.createHash('md5').update(s).digest("hex");
+}
 
 function b64(s) {
   return Buffer.from(s).toString('base64'); 
 }
 
 function decodeB64(s) {
-  return Buffer.from(s).toString('ascii'); 
+  // return Buffer.from(s).toString('ascii'); 
+  return Buffer.from(s, 'base64').toString('ascii');
+}
+
+function timestamp(date) {
+  const d = date || new Date();
+  return d.getTime();
 }
 
 function dateString(date,withSec) {
