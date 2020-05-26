@@ -221,7 +221,7 @@ class GoogleBucketsInstance
                 return JSON.parse(data);
             }
 
-            debug.error(`Read file ${fileName} from bucket ${bucketName}, to path ${path} `);
+            debug.log(`Read file ${fileName} from bucket ${bucketName}, to path ${localPath} `);
 
             return data;
         }
