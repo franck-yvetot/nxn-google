@@ -67,6 +67,22 @@ class GoogleBucketsInstance
         return `https://storage.googleapis.com/${buckN}/${filename}`;
       }    
 
+    getFileUri(bucketName,filename) {
+        const buckN =  this.config.buckets[bucketName]||bucketName;
+
+        return "gs://"+(`${buckN}/${filename}`).replace(/[/]+/,'/');
+    }
+
+    getBucketUri(bucketName,dir) {
+        const buckN =  this.config.buckets[bucketName]||bucketName;
+        if(dir)
+            dir = ('/'+dir.trim()+'/').replace(/[/]+/,'/');
+        else
+            dir = '/';
+
+        return `gs://${buckN}${dir}`;
+    }    
+
     async downloadFileFromBucket(bucketName,fileName,localPath,usecache) {
 
         let data = null;

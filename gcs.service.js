@@ -124,14 +124,14 @@ class GCS_ItemsSceInstance
     });
   }
 
-  deleteDoc(doc) {
+  deleteDoc(doc,mode='ASYNCHRONOUS') {
     let self = this;
 
     const dsId = doc.dsId;
     const itemId = doc.itemId;
     const version = doc.getVersion(true);
 
-    let fields = `version=${version}&mode=SYNCHRONOUS`;
+    let fields = `version=${version}&mode=`+mode;
 
     var url = `https://cloudsearch.googleapis.com/v1/indexing/datasources/${dsId}/items/${itemId}?${fields}&key=`;
   
