@@ -363,8 +363,10 @@ class GCSDocument
 
   setContent(str,type='TEXT') {
 
+    const str2 = str.slice(0,9000);
+
     this.item.content = {
-      "inlineContent": b64(str),
+      "inlineContent": b64(str2),
       "contentFormat": type
     };
   }

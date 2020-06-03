@@ -40,7 +40,7 @@ class GoogleBucketsInstance
             this.useLastIfFails = this.config.get_last_if_fails || false;
             this.uploadFile = this.config.upload_file || true;
             
-            const keypath = this.config.keypath || 'keyfile.json';
+            const keypath = this.config.keyPath || this.config.keypath ||'keyfile.json';
 
             // create storage client
             this.storage = new Storage({

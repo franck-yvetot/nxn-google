@@ -24,6 +24,8 @@ class SheetsInstance
         const auth   = await gauth.getJwt(SCOPES,keypath);
         this.sheets = google.sheets({version: 'v4', auth});
 
+        debug.log("connected to google.sheets with keys in "+keypath);
+
         return this.sheets;
     }
     catch(err) {
