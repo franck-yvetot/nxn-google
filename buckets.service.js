@@ -14,14 +14,14 @@ const debug=require("@nxn/debug")("GBUCKET");
 
 class GoogleBucketsInstance
 {
-    constructor(bucketCachePath,config) 
+    constructor(bucketCachePath,config,configPath) 
     {
         // client data where all config is stored by client
-        this.configDir = bucketCachePath; //pathConfig+cltName+"/";
+        this.configDir = configPath; //pathConfig+cltName+"/";
         this.config = config;
 
         // bucket local cache
-        this.localBucketsPath = this.configDir+'buckets/';
+        this.localBucketsPath = bucketCachePath+'buckets/';
         this.useCache = false;
         this.useLastIfFails = false;
         this.uploadFile = true;
@@ -308,13 +308,14 @@ class GoogleBucketsSce
     init(config) {
         this.config = config;
         this.log = config.log||{};
-        this.bucketCachePath = config.localPath||__clientDir;
+        this.bucketCachePath = config.localPath||__dataDir||__clientDir;
+        this.configPath = config.localPath||__clientDir;
     }
 
 
     getInstance(bucketCachePath) {
         bucketCachePath = bucketCachePath || this.bucketCachePath;
-        const inst = new GoogleBucketsInstance(bucketCachePath,this.config);
+        const inst = new GoogleBucketsInstance(bucketCachePath,this.config,this.configPath);
         return inst;
     }
 }
