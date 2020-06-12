@@ -25,7 +25,7 @@
     "@google-cloud/storage": "^4.7.0",
     "@nxn/config": "^1.0.5",
     "@nxn/debug": "^1.0.4",
-    "@nxn/ext": "^1.0.8",
+    "@nxn/ext": "^1.0.9",
     "@nxn/files": "^1.0.6",
     "axios": "^0.19.2",
     "firebase-admin": "^8.12.1",
