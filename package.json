@@ -23,13 +23,13 @@
   "dependencies": {
     "@google-cloud/bigquery": "^4.7.0",
     "@google-cloud/storage": "^4.7.0",
-    "@nxn/config": "^1.0.5",
+    "@nxn/config": "^1.0.7",
     "@nxn/debug": "^1.0.4",
-    "@nxn/ext": "^1.0.9",
+    "@nxn/ext": "^1.0.11",
     "@nxn/files": "^1.0.6",
     "axios": "^0.19.2",
     "firebase-admin": "^8.12.1",
-    "google-auth-library": "^6.0.1",
+    "google-auth-library": "^6.0.2",
     "googleapis": "^49.0.0",
     "request": "^2.88.2",
     "request-promise-native": "^1.0.8"
