@@ -251,13 +251,14 @@ class GoogleBucketsInstance
     }
 
     async writeFileData(bucketName,fileName,data,uploadFile) {
-        let path;
+        let localPath;
 
         uploadFile = (typeof uploadFile == "boolean") ? uploadFile : this.uploadFile;
+        const buckN =  this.config.buckets[bucketName]||bucketName;
 
         try 
         {
-            const localPath = this.getLocalPath(bucketName,fileName);
+            localPath = this.getLocalPath(bucketName,fileName);
 
             if(localPath.endsWith("json"))
             {
@@ -265,14 +266,23 @@ class GoogleBucketsInstance
             }
             
             await fs.writeFileAsync(localPath,data,true);
+        }
+        catch(err)
+        {
+            const error = err.stack || err;
+            debug.error(`cant write file ${fileName} to bucket ${bucketName} : ${buckN}, on path ${localPath} `+error);
+            return;
+        }
 
+        try 
+        {
             if(uploadFile)
                 await this.uploadFileToBucket(localPath,bucketName,fileName);
         }
         catch(err)
         {
             const error = err.stack || err;
-            debug.error(`cant write file ${fileName} to bucket ${bucketName}, on path ${path} `+error);
+            debug.error(`cant write file ${fileName} to bucket ${bucketName} : ${buckN}, on path ${localPath} `+error);
         }
     }
 

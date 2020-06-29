@@ -23,7 +23,7 @@
   "dependencies": {
     "@google-cloud/bigquery": "^4.7.0",
     "@google-cloud/storage": "^4.7.0",
-    "@nxn/config": "^1.0.7",
+    "@nxn/config": "^1.0.8",
     "@nxn/debug": "^1.0.4",
     "@nxn/ext": "^1.0.11",
     "@nxn/files": "^1.0.6",
