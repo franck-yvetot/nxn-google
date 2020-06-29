@@ -5,6 +5,7 @@ const arraySce=require("@nxn/ext/array.service");
 const stringSce=require("@nxn/ext/string.service");
 
 const crypto = require('crypto')   
+const configSce = require("@nxn/config");
 
 var scopes = [
     "https://www.googleapis.com/auth/cloud_search"
@@ -38,6 +39,7 @@ class GCS_ItemsSceInstance
       this.keypath = keypath;
       this.config = config;
       this.connectorName = config.connectorName || "default";
+      this.schemaPath = config.schemaPath || null;
       this.googleReq = googleReqSce.getInstance(keypath,scopes);
   }
 
@@ -85,6 +87,47 @@ class GCS_ItemsSceInstance
         .catch((err)=>
         {
           debug.error(`GCS GET ERROR on /datasources/${dsId}/items/${itemId} : `+err.message);
+          reject(err);
+        });
+    });    
+  }
+
+  getSchema(path) {
+    const schema = new GCSSchema(this.config);
+    if(path)
+      schema.loadFromPath(path);
+
+    return schema;
+  }
+
+  updateSchema(dsId,schema) {
+    let self = this;
+
+    if(!schema)
+    {
+      debug.error("Undefined GCS schema");
+      return null;
+    }
+
+    const payload = schema.payload();
+
+    const fields = "done%2Cerror%2Cmetadata%2Cname%2Cresponse"
+    var url = `https://cloudsearch.googleapis.com/v1/indexing/datasources/${dsId}/schema?key=`;
+                
+    return new Promise(function(resolve, reject) 
+    {
+        self.googleReq.put(url, payload)
+        .then((result) => 
+        {
+          if(result.error)
+            reject(result);
+          else
+            resolve(result);
+        })
+        .catch((err)=>
+        {
+          const message = err.message || (err.error && err.error.message) || err || '';
+          debug.error(`GCS UPDATE SCHEMA ERROR on /datasources/${dsId} : `+message);
           reject(err);
         });
     });    
@@ -464,6 +507,33 @@ class GCSDocument
   }
   
 }
+
+class GCSSchema
+{
+  constructor(config) 
+  {
+    this.config = config||{};
+  }
+
+  loadFromPath(path) {
+    return this.schema = configSce.loadCleanConfig(path);
+  }
+
+  payload(mode="ASYNCHRONOUS") {
+    return { schema:this.schema };
+  } 
+
+  type(asCSV=true) {
+    let type = [];
+    this.schema.objectDefinitions.forEach(def => type.push(def.name));
+    
+    if(asCSV)
+      return type.join(',');
+    else
+      return type;
+  }
+}
+
 
 module.exports = new GCSearchSce();
 

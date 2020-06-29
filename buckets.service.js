@@ -82,6 +82,9 @@ class GoogleBucketsInstance
 
         return `gs://${buckN}${dir}`;
     }    
+    getBucketName(bucketName) {
+        return  this.config.buckets[bucketName]||bucketName;
+    }    
 
     async downloadFileFromBucket(bucketName,fileName,localPath,usecache) {
 
@@ -122,6 +125,7 @@ class GoogleBucketsInstance
         var self = this;
         usecache = (typeof usecache == "boolean") ? usecache : this.useCache;
         useLastIfFails = (typeof useLastIfFails == "boolean") ? useLastIfFails : this.useLastIfFails;
+        const buckN =  this.config.buckets[bucketName]||bucketName;
 
         try 
         {
@@ -130,7 +134,6 @@ class GoogleBucketsInstance
             const options = {};
 
             // actual bucket name
-            const buckN =  this.config.buckets[bucketName]||bucketName;
             const bucket = this.storage.bucket(buckN);
 
             // Lists files in the bucket, filtered by a prefix
@@ -159,7 +162,7 @@ class GoogleBucketsInstance
                 }
                 catch(err)
                 {
-                    debug.error(`cant read file ${fileName} in bucket ${bucketName}, on path ${localPath} `+err);
+                    debug.error(`cant read file ${fileName} in bucket ${bucketName} : ${buckN}, on path ${localPath} `+err);
                 }
 
                 try {
@@ -171,7 +174,7 @@ class GoogleBucketsInstance
         }
         catch(err)
         {
-            debug.error(`cant read files from bucket ${bucketName} `+err);
+            debug.error(`cant read files from bucket ${bucketName} : ${buckN}`+err);
         }
 
         return ;

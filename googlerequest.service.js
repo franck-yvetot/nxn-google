@@ -24,7 +24,11 @@ class GoogleRequestInstance
         this.config = config;
     }
 
-    post(url, payload) {
+    put(url, payload,method="put") {
+        return this.post(url, payload,method);
+    }
+
+    post(url, payload,method="post") {
 
         let self = this;
 
@@ -49,9 +53,11 @@ class GoogleRequestInstance
                 ...reqMeta.headers // NB. new syntax ES6
             };
 
+            method = method.toUpperCase();
+
             RequestP({
                 uri: url,
-                method: 'POST',
+                method: method,
                 headers: headers,
                 body: payload,
                 json:true
