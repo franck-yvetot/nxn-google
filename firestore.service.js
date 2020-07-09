@@ -1,12 +1,19 @@
 const debug = require("@nxn/debug")('FIRESTORE');
 const admin = require('firebase-admin');
+const {configSce} = require('@nxn/boot');
 
 class FireStoreInstance
 {
+  constructor(config) {
+    this.init(config);
+  }
 
-  constructor(config,keyPath) {
+  async init(config) {
+    if(!config || this.config)
+      return;
+
       this.config=config;
-      this.keyPath = keyPath;
+    this.keyPath = config.keyPath || config.keypath || '.keypath.json';
   }
 
   async connect() {
@@ -15,7 +22,7 @@ class FireStoreInstance
 
     // buckets config
     try {            
-        let serviceAccount = require(this.keyPath);
+        let serviceAccount = configSce.loadConfig(this.keyPath);
 
         if(!serviceAccount.project_id)
             throw "cant find keys for connecting firestore instance";
@@ -46,6 +53,71 @@ class FireStoreInstance
 
     return this.db.collection(col);
   }
+
+  async find(query,col,limit=0,skip=0) {
+    await this.connect();
+
+    limit = parseInt(limit);
+    const docs = await this.db.collection(col).find(query,{skip:skip,limit:limit}).toArray();
+    
+    return docs;
+  }
+
+  async count(query,col,limit=0,skip=0) {
+    await this.connect();
+
+    limit = parseInt(limit);
+    const n = await this.db.collection(col).countDocuments(query);
+    
+    return n;
+  }
+  
+  async insertOne(doc,col) {
+    await this.connect();
+
+    const r = await this.db.collection(col).insertOne(doc);
+    
+    return r.insertedCount;
+  }
+
+  async insertMany(docs,col) {
+    await this.connect();
+
+    const r = await this.db.collection(col).insertMany(docs);
+
+    return r.insertedCount;
+  }
+
+  async updateOne(query,update,col,addIfMissing=true) {
+    await this.connect();
+
+    const r = await this.db.collection(col).updateOne(query,{$set:update},{upsert: addIfMissing});
+    
+    return r.modifiedCount;
+  }
+
+  async updateMany(query,update,col,addIfMissing=true) {
+    await this.connect();
+
+    const r = await this.db.collection(col).updateMany(query,{$set:update},{upsert: addIfMissing});
+
+    return r.modifiedCount;
+  }
+
+  async deleteOne(query,col) {
+    await this.connect();
+
+    const r = await this.db.collection(col).deleteOne(query);
+    
+    return r.deletedCount;
+  }
+  async deleteMany(query,col) {
+    await this.connect();
+
+    const r = await this.db.collection(col).deleteMany(query);
+    
+    return r.deletedCount;
+  }  
 }
 
 class FireStoreSce
@@ -70,7 +142,7 @@ class FireStoreSce
     let keyPath = __clientDir;
     keyPath += config.keyPath || this.config.keyPath || 'keyfile.json';
 
-    return new FireStoreInstance(config,keyPath)
+    return new FireStoreInstance(config)
   }
 }
   
