@@ -5,10 +5,9 @@ const {configSce} = require('@nxn/boot');
 class FireStoreInstance
 {
   constructor(config) {
-    this.init(config);
   }
 
-  async init(config) {
+  async init(config,ctxt) {
     if(!config || this.config)
       return;
 
@@ -54,20 +53,57 @@ class FireStoreInstance
     return this.db.collection(col);
   }
 
-  async find(query,col,limit=0,skip=0) {
+  async find(query,col,limit=0,skip=0,orderBy=null,fields=null) {
     await this.connect();
 
     limit = parseInt(limit);
-    const docs = await this.db.collection(col).find(query,{skip:skip,limit:limit}).toArray();
+    const coll = this.db.collection(col);
+    if(query && Object.keys(query).length > 0)
+    {
+      Object.keys(query).forEach((v,fname)=> {
+        const val = v.value||v;
+        const op = v.operator || "==";
+        coll.where(fname,op,val);
+      });
+    }
+
+    if(orderBy && orderBy.length > 0)
+    {
+      orderBy.forEach((v)=> {
+        const fname = k;
+        coll.orderBy(fname);
+      });
+    }
+
+    if(skip)
+      coll.startAt(skip);
     
-    return docs;
+    if(limit)
+      coll.limit(limit);
+    
+    if(fields)
+      coll.select(fields);
+
+    const snap = await coll.get();
+    const docs = snap.docs;
+    
+    let results = [];
+    if (!snap.empty) snap.forEach(doc => {
+      let data = doc.data();
+      data._id = doc.id;
+      results.push(data);
+    });
+        
+    return results;
   }
 
-  async count(query,col,limit=0,skip=0) {
+  async count(col, query=null) {
     await this.connect();
 
-    limit = parseInt(limit);
-    const n = await this.db.collection(col).countDocuments(query);
+    const collection = this.db.collection(col);
+    const recSet = (query && Object.keys(query).length > 0) ? collection.where(query) : collection;
+    const snap = await collection.select().get();
+    const n = snap.size;
     
     return n;
   }
@@ -75,9 +111,11 @@ class FireStoreInstance
   async insertOne(doc,col) {
     await this.connect();
 
-    const r = await this.db.collection(col).insertOne(doc);
+    const id = doc.id;
+    const coll = this.db.collection(col);
+    const res = coll.doc(id).set(doc);
     
-    return r.insertedCount;
+    return res;
   }
 
   async insertMany(docs,col) {
@@ -126,11 +164,6 @@ class FireStoreSce
       this.config = {};
   }
 
-  // if init by boot.service, get a config
-  init(config,app,express) {
-      this.config = config;
-  }
-
   getInstance(name) {
     let config = {};
 
@@ -138,9 +171,6 @@ class FireStoreSce
         config = this.config.instances[name];
     else
         config = this.config;
-
-    let keyPath = __clientDir;
-    keyPath += config.keyPath || this.config.keyPath || 'keyfile.json';
 
     return new FireStoreInstance(config)
   }
