@@ -28,7 +28,7 @@
     "@nxn/ext": "^1.0.19",
     "@nxn/files": "^1.0.10",
     "axios": "^0.21.1",
-    "firebase-admin": "^10.2.0",
+    "firebase-admin": "^11.5.0",
     "google-auth-library": "^6.1.6",
     "googleapis": "^49.0.0",
     "request": "^2.88.2",
