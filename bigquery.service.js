@@ -1,6 +1,3 @@
-var gauth = require("./googleauth2");
-var RequestP = require("request-promise-native");
-
 const debug = require("@nxn/debug")('BIGQUERY');
 const {BigQuery} = require('@google-cloud/bigquery');
 
