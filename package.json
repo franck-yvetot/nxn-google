@@ -1,6 +1,6 @@
 {
   "name": "@nxn/google",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "description": "google APIs wrapped in services that can be configured from a json object (such as managed by @nxn/boot)",
   "main": "index.js",
   "scripts": {
