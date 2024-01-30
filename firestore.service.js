@@ -178,3 +178,4 @@ class FireStoreSce
   
 
 module.exports = new FireStoreSce();
+module.exports.FireStoreInstance = FireStoreInstance;

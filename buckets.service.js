@@ -12,7 +12,7 @@ const fs = require('@nxn/files/file.service');
 
 const debug=require("@nxn/debug")("GBUCKET");
 
-class GoogleBucketsInstance
+class GoogleBuckets
 {
     constructor(bucketCachePath,config,configPath) 
     {
@@ -328,9 +328,11 @@ class GoogleBucketsSce
 
     getInstance(bucketCachePath) {
         bucketCachePath = bucketCachePath || this.bucketCachePath;
-        const inst = new GoogleBucketsInstance(bucketCachePath,this.config,this.configPath);
+        const inst = new GoogleBuckets(bucketCachePath,this.config,this.configPath);
         return inst;
     }
 }
 
 module.exports = new GoogleBucketsSce();
+module.exports.GoogleBuckets = GoogleBuckets;
+module.exports.GoogleBucketsSce = GoogleBucketsSce;
