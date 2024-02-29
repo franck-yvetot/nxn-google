@@ -40,7 +40,8 @@ class SheetsInstance
     return sheets;
   }
 
-  async readRange(range) {
+  async readRange(range) 
+  {
     const sheets = await this.connect(this.keyPath);
      
     return new Promise((resolve, reject) => {
@@ -58,6 +59,30 @@ class SheetsInstance
             });      
         });
   }
+
+  async writeRange(range, values) 
+  {
+    const sheets = await this.connect(this.keyPath);
+
+    return new Promise((resolve, reject) => {
+        sheets.spreadsheets.values.update(
+            {
+                spreadsheetId: this.spreadsheetId,
+                range: range,
+                valueInputOption: 'RAW',
+                requestBody: {
+                    values: values
+                }
+            },
+            (err, res) => {
+                if (err)
+                    return reject(err);
+
+                return resolve(res.data);
+            });
+    });
+}
+
 }
 
 class SheetsSce
@@ -91,3 +116,4 @@ class SheetsSce
 }
 
 module.exports = new SheetsSce();
+module.exports.SheetsInstance = SheetsInstance;
