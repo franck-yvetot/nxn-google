@@ -1,5 +1,4 @@
 /* Service for Google Buckets */ 
-const axios = require("axios");
 const configSce = require("@nxn/config");
 
 const {Storage} = require('@google-cloud/storage');
@@ -61,20 +60,29 @@ class GoogleBuckets
 
     }
 
-    getFileUrl(bucketName,filename) {
+    fileExists(bucketName,filepath) 
+    {
         const buckN =  this.config.buckets[bucketName]||bucketName;
+        const bucket = this.storage.bucket(buckN);
+        const file = bucket.file(filepath);
+    }
 
+    getFileUrl(bucketName,filename) 
+    {
+        const buckN =  this.config.buckets[bucketName]||bucketName;
         return `https://storage.googleapis.com/${buckN}/${filename}`;
-      }    
+    }    
 
-    getFileUri(bucketName,filename) {
+    getFileUri(bucketName,filename) 
+    {
         const buckN =  this.config.buckets[bucketName]||bucketName;
-
         return "gs://"+(`${buckN}/${filename}`).replace(/[/]+/,'/');
     }
 
-    getBucketUri(bucketName,dir) {
+    getBucketUri(bucketName,dir) 
+    {
         const buckN =  this.config.buckets[bucketName]||bucketName;
+
         if(dir)
             dir = ('/'+dir.trim()+'/').replace(/[/]+/,'/');
         else
@@ -82,7 +90,16 @@ class GoogleBuckets
 
         return `gs://${buckN}${dir}`;
     }    
-    getBucketName(bucketName) {
+
+    /**
+     * map bucket name to actual name from the config of buckets.
+     * Bucket name can then be used as a key in config table, or actual bucket name.
+     * 
+     * @param {*} bucketName 
+     * @returns 
+     */
+    getBucketName(bucketName) 
+    {
         return  this.config.buckets[bucketName]||bucketName;
     }    
 
@@ -118,6 +135,82 @@ class GoogleBuckets
 
             return Promise.reject(err);
         }
+    }
+
+    /**
+     * 
+     * @param {*} bucketName 
+     * @param {*} dir file prefix ex. /files/1000
+     * @param {*} cb 
+     * @param {*} filter 
+     * @returns {Promise<{name:string,file:File}[]>}
+     */
+    async listFiles(bucketName,dir='',cb=null,filter=null)
+    {
+        var self = this;
+        const buckN =  this.config.buckets[bucketName]||bucketName;
+
+        try 
+        {
+            await this.connect();
+
+            let results = [];
+
+            let options = {};
+
+            if(dir)
+                options.prefix = (dir+'/').replace("//","/");
+
+            // actual bucket name
+            const bucket = this.storage.bucket(buckN);
+
+            // Lists files in the bucket, filtered by a prefix
+            const [files] = await bucket.getFiles(options);           
+
+            const n = files.length;
+            let i = 0;
+            files.forEach(async function (file)
+            {
+                const fileName = file.name;
+                let data,metadata;
+
+                try {
+                    [metadata] = await file.getMetadata();
+
+                    if(filter)
+                    {
+                        let [ok,reason] = filter.accepts(metadata);
+                        if(!ok)
+                        {
+                            return;
+                        }
+                    }
+
+                    results.push({name:file.name,file});
+                }
+                catch(err)
+                {
+                    debug.error(`cant read file ${fileName} in bucket ${bucketName} : ${buckN}, on path ${localPath} `+err);
+                }
+
+                if(cb)
+                {
+                    try 
+                    {
+                        await cb(fileName, file,++i,n);                    
+                    } 
+                    catch (error) {
+                        debug.error(`cant process file ${fileName} from bucket `+error.message+"  "+error.stack);
+                    }    
+                }
+            });
+        }
+        catch(err)
+        {
+            debug.error(`cant read files from bucket ${bucketName} : ${buckN}`+err);
+        }
+
+        return ;
     }
 
     async readFiles(bucketName,cb,filter,usecache,useLastIfFails) 
@@ -321,10 +414,9 @@ class GoogleBucketsSce
     init(config) {
         this.config = config;
         this.log = config.log||{};
-        this.bucketCachePath = config.localPath||__dataDir||__clientDir;
-        this.configPath = config.localPath||__clientDir;
+        this.bucketCachePath = config.localPath||global.__dataDir||global.__clientDir;
+        this.configPath = config.localPath||global.__clientDir;
     }
-
 
     getInstance(bucketCachePath) {
         bucketCachePath = bucketCachePath || this.bucketCachePath;
