@@ -3,25 +3,38 @@ const {google} = require('googleapis');
 const gauth = require("./googleauth.service");
 
 // check : https://blog.stephsmith.io/tutorial-google-sheets-api-node-js/
+// check : https://developers.google.com/sheets/api/quickstart/nodejs#step_3_set_up_the_sample
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly'];
 
 class SheetsInstance
 {
 
-  constructor(config,keyPath) {
+  constructor(config,keyPath,keys=null) {
       this.config=config;
       this.keyPath = keyPath;
+      this.keys = keys;
       this.sheets = null;
       this.spreadsheetId = config.spreadsheetId;
   }
 
-  async connect(keypath) {
+  async connect(keypath,keys=null) {
     if(this.sheets)
         return this.sheets; 
 
-    try {            
-        const auth   = await gauth.getJwt(SCOPES,keypath);
+    try 
+    { 
+        let auth;
+
+        if(keys) 
+        {
+            auth   = await gauth.getJwtFromKeys(SCOPES,keys);            
+        }
+        else
+        {
+            auth   = await gauth.getJwt(SCOPES,keypath);
+        }
+
         this.sheets = google.sheets({version: 'v4', auth});
 
         debug.log("connected to google.sheets with keys in "+keypath);
@@ -34,15 +47,15 @@ class SheetsInstance
     }
 }  
 
-  async sheets() {
-    
-    const sheets = await this.connect(this.keyPath);
+  async sheets() 
+  {    
+    const sheets = await this.connect(this.keyPath,this.keys);
     return sheets;
   }
 
   async readRange(range) 
   {
-    const sheets = await this.connect(this.keyPath);
+    const sheets = await this.connect(this.keyPath,this.keys);
      
     return new Promise((resolve, reject) => {
         sheets.spreadsheets.values.get(
@@ -62,7 +75,7 @@ class SheetsInstance
 
   async writeRange(range, values) 
   {
-    const sheets = await this.connect(this.keyPath);
+    const sheets = await this.connect(this.keyPath,this.keys);
 
     return new Promise((resolve, reject) => {
         sheets.spreadsheets.values.update(
@@ -97,7 +110,7 @@ class SheetsSce
   }
 
   // get instance by sheet id, or from sce config or from sce instance config by name/id
-  getInstance(id,keyPath) {
+  getInstance(id,keyPath,keys) {
     let config = {};
 
     if(this.config.instances && this.config.instances[id])
@@ -111,7 +124,7 @@ class SheetsSce
     if(!this.config.spreadsheetId)
         this.config.spreadsheetId = id;
 
-    return new SheetsInstance(config,keyPath)
+    return new SheetsInstance(config,keyPath,keys)
   }
 }
 

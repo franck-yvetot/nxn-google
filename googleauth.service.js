@@ -10,6 +10,20 @@ class GoogleAuthSce {
         this.dir = config.basePath;
     }
 
+    async getJwtFromKeys(scopes,keys) 
+    {
+        this.jwt[keys.client_email] = new google.auth.JWT(keys.client_email, null, keys.private_key, scopes);
+    
+        return new Promise((resolve, reject) => {
+            this.jwt[keys.client_email].authorize((err, response) => {
+                if(err)
+                    reject(new Error(err));
+                else
+                    resolve(this.jwt[keys.client_email]);
+            });
+        });
+    }
+
     async getJwt(scopes,keypath) {
         keypath = keypath || ".jwt_keys.json";
         const self = this;
@@ -19,7 +33,10 @@ class GoogleAuthSce {
     
         // const dir = this.dir || __clientDir;
         const keys = require(keypath);
-    
+
+        return this.getJwtFromKeys(scopes,keys);
+
+        /*
         this.jwt[keypath] = new google.auth.JWT(keys.client_email, null, keys.private_key, scopes);
     
         return new Promise((resolve, reject) => {
@@ -30,7 +47,8 @@ class GoogleAuthSce {
                     resolve(self.jwt[keypath]);
             });
         });
-      }
+        */
+    }
       
 }
 
